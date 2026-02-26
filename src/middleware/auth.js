@@ -1,32 +1,15 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-
-async function attachUser(req, res, next) {
-  const token = req.cookies?.authToken;
-  if (!token) return next();
-
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(payload.sub);
-    if (user && user.role !== 'banned') {
-      req.user = user;
-      res.locals.currentUser = user;
-    }
-  } catch (_err) {
-    res.clearCookie('authToken');
-  }
-
+function attachUser(_req, res, next) {
+  res.locals.currentUser = null;
   return next();
 }
 
-function requireAuth(req, res, next) {
-  if (!req.user) return res.status(401).render('auth/login', { error: 'Login required.' });
-  if (req.user.role === 'shadow') req.isShadowBanned = true;
+function requireAuth(_req, _res, next) {
   return next();
 }
 
 function requireAdmin(req, res, next) {
-  if (!req.user || req.user.role !== 'admin') {
+  const adminKey = req.get('x-admin-key') || req.query.adminKey;
+  if (!process.env.ADMIN_PANEL_KEY || adminKey !== process.env.ADMIN_PANEL_KEY) {
     return res.status(403).send('Forbidden');
   }
   return next();

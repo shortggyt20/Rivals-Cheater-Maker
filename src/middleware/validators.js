@@ -7,6 +7,7 @@ const lookupValidation = [
 const reportValidation = [
   body('targetRobloxId').isString().trim().notEmpty(),
   body('targetUsername').isString().trim().isLength({ min: 3, max: 20 }),
+  body('reporterAlias').isString().trim().isLength({ min: 2, max: 40 }),
   body('classification').isIn(['clean', 'suspicious', 'likely_cheater']),
   body('reason').isString().trim().isLength({ min: 8, max: 160 }),
   body('description').isString().trim().isLength({ min: 15, max: 1000 })

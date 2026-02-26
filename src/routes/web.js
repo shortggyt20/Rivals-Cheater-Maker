@@ -4,12 +4,11 @@ const Appeal = require('../models/Appeal');
 const { calculateCheaterScore } = require('../services/scoreService');
 const { getUserByUsername, computeAccountAgeDays, getPreviousUsernames } = require('../services/robloxService');
 const { lookupValidation, appealValidation, handleValidation } = require('../middleware/validators');
-const { requireAuth } = require('../middleware/auth');
 const { logActivity } = require('../services/logService');
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
   const leaderboard = await Report.aggregate([
     { $match: { status: 'approved' } },
     { $group: { _id: '$targetRobloxId', targetUsername: { $first: '$targetUsername' }, count: { $sum: 1 } } },
@@ -28,7 +27,6 @@ router.get('/u/:username', lookupValidation, handleValidation, async (req, res) 
   const previousUsernames = await getPreviousUsernames(robloxUser.id);
   const scoreData = await calculateCheaterScore(robloxUser.id);
   const reports = await Report.find({ targetRobloxId: robloxUser.id, status: 'approved' })
-    .populate('reporter', 'username avatarUrl trustScore')
     .sort({ createdAt: -1 })
     .limit(20);
 
@@ -42,9 +40,9 @@ router.get('/u/:username', lookupValidation, handleValidation, async (req, res) 
   return res.render('profile', { result, reports, error: null });
 });
 
-router.post('/appeals', requireAuth, appealValidation, async (req, res) => {
+router.post('/appeals', appealValidation, async (req, res) => {
   await Appeal.create(req.body);
-  await logActivity({ actor: req.user._id, action: 'appeal_submitted', details: req.body, ip: req.ip });
+  await logActivity({ action: 'appeal_submitted', details: req.body, ip: req.ip });
   return res.redirect('/?appeal=received');
 });
 

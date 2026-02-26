@@ -19,7 +19,6 @@ const { attachUser } = require('./middleware/auth');
 
 const webRoutes = require('./routes/web');
 const reportRoutes = require('./routes/reports');
-const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const apiRoutes = require('./routes/api');
 
@@ -68,7 +67,6 @@ app.use('/static', express.static(path.join(__dirname, 'public')));
 
 app.use('/', webRoutes);
 app.use('/reports', reportRoutes);
-app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/api', apiRoutes);
 
