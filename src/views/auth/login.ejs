@@ -1,0 +1,8 @@
+<%- include('../partials/header') %>
+<section class="mx-auto max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 text-center">
+  <h1 class="text-2xl font-bold">Login with Roblox</h1>
+  <p class="mt-2 text-slate-300">Secure OAuth2 authentication is required for report submissions.</p>
+  <% if (error) { %><p class="mt-3 rounded bg-red-900/40 p-2 text-red-200"><%= error %></p><% } %>
+  <a href="<%= oauthUrl %>" class="mt-4 inline-block rounded bg-cyan-600 px-4 py-2">Continue with Roblox</a>
+</section>
+<%- include('../partials/footer') %>

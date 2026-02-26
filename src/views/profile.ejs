@@ -1,0 +1,64 @@
+<%- include('partials/header') %>
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="rounded-xl border border-slate-800 bg-slate-900 p-6 lg:col-span-2">
+    <div class="flex items-center gap-4">
+      <img src="<%= result.avatarUrl %>" class="h-20 w-20 rounded-lg border border-slate-700" alt="avatar" />
+      <div>
+        <h1 class="text-2xl font-bold"><%= result.displayName %> <span class="text-slate-400">(@<%= result.username %>)</span></h1>
+        <p class="text-sm text-slate-400">User ID: <%= result.id %></p>
+      </div>
+    </div>
+
+    <div class="mt-5 grid gap-3 md:grid-cols-2">
+      <div class="rounded bg-slate-800 p-3">Join Date: <%= new Date(result.created).toDateString() %></div>
+      <div class="rounded bg-slate-800 p-3">Account Age: <%= result.accountAgeDays %> days</div>
+      <div class="rounded bg-slate-800 p-3 md:col-span-2">Previous Usernames: <%= result.previousUsernames.join(', ') || 'Unavailable' %></div>
+      <div class="rounded bg-slate-800 p-3 md:col-span-2">Rivals Stats: K/D placeholder, rank placeholder, match history placeholder</div>
+    </div>
+
+    <div class="mt-6">
+      <p class="mb-2 font-semibold">Cheater Likelihood: <%= result.scoreData.score %>% (<%= result.scoreData.label %>)</p>
+      <div class="h-4 w-full rounded bg-slate-800">
+        <div class="h-4 rounded <%= result.scoreData.color === 'green' ? 'bg-emerald-500' : (result.scoreData.color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500') %>" style="width:<%= result.scoreData.score %>%"></div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="rounded-xl border border-slate-800 bg-slate-900 p-6">
+    <h2 class="text-lg font-semibold">Submit Report</h2>
+    <form class="mt-3 space-y-3" method="post" action="/reports" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <input type="hidden" name="targetRobloxId" value="<%= result.id %>" />
+      <input type="hidden" name="targetUsername" value="<%= result.username %>" />
+      <input name="reporterAlias" maxlength="40" class="w-full rounded bg-slate-800 p-2" placeholder="Your nickname (public)" required />
+      <select name="classification" class="w-full rounded bg-slate-800 p-2">
+        <option value="clean">Clean</option>
+        <option value="suspicious">Suspicious</option>
+        <option value="likely_cheater">Likely Cheater</option>
+      </select>
+      <input name="reason" maxlength="160" class="w-full rounded bg-slate-800 p-2" placeholder="Reason" required />
+      <textarea name="description" maxlength="1000" class="w-full rounded bg-slate-800 p-2" placeholder="Description" required></textarea>
+      <input type="file" name="evidence" accept="image/*,video/*" required class="w-full rounded bg-slate-800 p-2" />
+      <button class="w-full rounded bg-cyan-600 py-2">Submit Report</button>
+    </form>
+  </aside>
+</div>
+
+<section class="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-6">
+  <h2 class="text-lg font-semibold">Approved Evidence</h2>
+  <div class="mt-4 space-y-4">
+    <% reports.forEach(report => { %>
+      <article class="rounded bg-slate-800 p-3">
+        <p class="font-semibold"><%= report.classification %> • <%= report.reason %> • by <%= report.reporterAlias %></p>
+        <p class="text-sm text-slate-300"><%= report.description %></p>
+        <% if (report.evidenceMimeType.startsWith('image/')) { %>
+          <img src="<%= report.evidencePath %>" class="mt-2 max-h-72 rounded" alt="evidence" />
+        <% } else { %>
+          <video controls class="mt-2 max-h-72 rounded"><source src="<%= report.evidencePath %>" type="<%= report.evidenceMimeType %>" /></video>
+        <% } %>
+      </article>
+    <% }) %>
+    <% if (!reports.length) { %><p class="text-slate-400">No approved evidence yet.</p><% } %>
+  </div>
+</section>
+<%- include('partials/footer') %>
